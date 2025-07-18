@@ -7,4 +7,25 @@
     <color name="teal_700">#FF018786</color>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
+
+    <color name="colorPrimary">#008577</color>
+    <color name="colorPrimaryDark">#00574B</color>
+    <color name="colorAccent">#D81B60</color>
+    <color name="light_green">#F095E3C3</color>
+    <color name="text_color_cr_reduce">#FF7226</color>
+    <color name="blue">#12b7f5</color>
+    <color name="bg_blue">#60A6F8</color>
+    <color name="blue2">#7712b7f5</color>
+    <color name="yellow_green">#77FFFF00</color>
+
+    <color name="banner_indicator_default">#26222222</color>
+    <color name="banner_indicator_selected">#4D222222</color>
+
+    <color name="item_h1_text_color">#FF222222</color>
+    <color name="item_h2_text_color">#A6222222</color>
+    <color name="item_h3_text_color">#59222222</color>
+    <color name="zydark_color_banner_ad_background">#eef0ff</color>
+
+    <color name="status_bar_night_mode">#000000</color>
+    <color name="transparent">#00000000</color>
 </resources>
