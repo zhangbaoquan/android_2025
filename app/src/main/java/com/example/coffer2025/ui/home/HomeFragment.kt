@@ -1,10 +1,10 @@
 package com.example.coffer2025.ui.home
 
+import android.annotation.SuppressLint
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Button
 import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
@@ -12,6 +12,7 @@ import androidx.lifecycle.lifecycleScope
 import com.example.coffer2025.databinding.FragmentHomeBinding
 import com.example.coffer2025.ui.coroutine.NetFetcher
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 
 class HomeFragment : Fragment() {
@@ -22,6 +23,7 @@ class HomeFragment : Fragment() {
     // onDestroyView.
     private val binding get() = _binding!!
     private val netFetcher = NetFetcher()
+    private lateinit var textView: TextView
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -34,20 +36,62 @@ class HomeFragment : Fragment() {
         _binding = FragmentHomeBinding.inflate(inflater, container, false)
         val root: View = binding.root
 
-        val textView: TextView = binding.textHome
+        textView = binding.textHome
         homeViewModel.text.observe(viewLifecycleOwner) {
             textView.text = it
         }
         textView.setOnClickListener {
             homeViewModel.sendData()
         }
-        val btn1 : Button = binding.btn1
-        btn1.setOnClickListener{
-            lifecycleScope.launch (Dispatchers.Main){
+        binding.btn1.setOnClickListener {
+            lifecycleScope.launch(Dispatchers.Main) {
                 textView.text = netFetcher.fetcherDate1()
             }
         }
+
+        binding.btn2.setOnClickListener {
+            // 并行计算
+            parallel()
+        }
+
+        binding.btn3.setOnClickListener {
+            // 串行计算
+            serial()
+        }
         return root
+    }
+
+    /**
+     * 协程并行计算
+     */
+    @SuppressLint("SetTextI18n")
+    private fun parallel() {
+        lifecycleScope.launch {
+            val t1 = System.currentTimeMillis()
+            // async 会立即启动协程，不会阻塞
+            val deferred1 = async { netFetcher.getUserInfo() }
+            val deferred2 = async { netFetcher.getOrders() }
+            println("Waiting...")
+
+            val result1 = deferred1.await()
+            val result2 = deferred2.await()
+            textView.text =
+                "Done: $result1 + $result2 + 耗时 ： ${System.currentTimeMillis() - t1}"
+        }
+    }
+
+    /**
+     * 串行计算
+     */
+    @SuppressLint("SetTextI18n")
+    private fun serial() {
+        lifecycleScope.launch {
+            val t1 = System.currentTimeMillis()
+            val str1 = netFetcher.getUserInfo()
+            val str2 = netFetcher.getOrders()
+            textView.text =
+                "Done: $str1 + $str2 + 耗时 ： ${System.currentTimeMillis() - t1}"
+        }
     }
 
     override fun onDestroyView() {

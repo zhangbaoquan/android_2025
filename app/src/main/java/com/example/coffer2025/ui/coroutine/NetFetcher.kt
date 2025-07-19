@@ -12,10 +12,20 @@ import kotlinx.coroutines.withContext
 
 class NetFetcher {
 
-    suspend fun fetcherDate1() : String{
-       return withContext(Dispatchers.IO){
+    suspend fun fetcherDate1(): String {
+        return withContext(Dispatchers.IO) {
             delay(1000)
-           "协程回来啦"
+            "协程回来啦"
         }
+    }
+
+    suspend fun getUserInfo(): String {
+        delay(1000)
+        return "getUserInfo"
+    }
+
+    suspend fun getOrders(): String {
+        delay(1200)
+        return "getOrders"
     }
 }
