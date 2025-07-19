@@ -17,6 +17,8 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withContext
+import kotlin.system.measureTimeMillis
 
 class HomeFragment : Fragment() {
 
@@ -65,6 +67,10 @@ class HomeFragment : Fragment() {
 
         binding.btn4.setOnClickListener {
             customScope()
+        }
+        binding.btn5.setOnClickListener {
+//            useDispatchersV1()
+            useDispatchersV2()
         }
         return root
     }
@@ -116,7 +122,40 @@ class HomeFragment : Fragment() {
             }
             println("done")
         }
+    }
 
+    private fun useDispatchersV1() {
+        // 这里的写法是lifecycleScope 默认运行在Default 上，然后调用loadDataV2，让协程运行在IO 上，
+        // 最后把结果运行Default 上。没有真正利用 Dispatchers.Default 做数据处理逻辑
+        lifecycleScope.launch(Dispatchers.Default) {
+            println(loadDataV2())
+        }
+    }
+
+    private fun useDispatchersV2() {
+        // 两个协程切换练习
+        lifecycleScope.launch {
+           val time = measureTimeMillis {
+                // 第 1 阶段：在 IO Dispatcher 中读取文件
+                val res1 = withContext(Dispatchers.IO) {
+                    delay(1000)
+                    "hahah"
+                }
+                // 第 2 阶段：在 Default Dispatcher 中处理内容
+                val res2 = withContext(Dispatchers.Default) {
+                    res1.uppercase()
+                }
+                println("最终数据: $res2")
+            }
+            println("耗时 ： $time")
+        }
+    }
+
+    private suspend fun loadDataV2(): String {
+        return withContext(Dispatchers.IO) {
+            delay(1000)
+            "jajaj"
+        }
     }
 
     override fun onDestroyView() {

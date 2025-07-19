@@ -37,3 +37,9 @@ suspend 关键字的作用是允许该函数“挂起自己”，并让出线程
 * 3、viewModelScope ；生命周期是随 ViewModel 自动销毁， 使用场景是Android 推荐方式。
 * 4、lifecycleScope；生命周期上与 Fragment/Activity 生命周期绑定 ，使用场景是自动管理 UI 协程。
 **注意**：父协程（runBlocking）会等待所有子协程完成后再退出。
+### 关于协程调度器Dispatcher
+* 1、Dispatchers.Main ，用途是：UI线程，仅在 Android 有效。
+* 2、Dispatchers.IO ，用途是：IO密集型操作，如网络/数据库。
+* 3、Dispatchers.Default ，用途是：CPU密集型任务（如计算）。
+* 4、Dispatchers.Unconfined ，不指定线程，测试时用。
+
