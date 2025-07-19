@@ -29,4 +29,11 @@ suspend 关键字的作用是允许该函数“挂起自己”，并让出线程
 
 
 # 二、协程知识梳理（第二讲）
-* 1、
+## 理解 CoroutineScope 与结构化并发
+### 什么是 CoroutineScope？
+协程必须运行在某个作用域内，协程的“生命周期”和作用域绑定。
+* 1、GlobalScope ：生命周期是永久存在（不推荐使用） 。使用场景是非生命周期感知的后台任务。
+* 2、CoroutineScope()；生命周期是手动管理 Job 生命周期，使用场景是自定义组件或工具类。
+* 3、viewModelScope ；生命周期是随 ViewModel 自动销毁， 使用场景是Android 推荐方式。
+* 4、lifecycleScope；生命周期上与 Fragment/Activity 生命周期绑定 ，使用场景是自动管理 UI 协程。
+**注意**：父协程（runBlocking）会等待所有子协程完成后再退出。

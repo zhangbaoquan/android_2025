@@ -11,9 +11,12 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import com.example.coffer2025.databinding.FragmentHomeBinding
 import com.example.coffer2025.ui.coroutine.NetFetcher
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 
 class HomeFragment : Fragment() {
 
@@ -24,6 +27,7 @@ class HomeFragment : Fragment() {
     private val binding get() = _binding!!
     private val netFetcher = NetFetcher()
     private lateinit var textView: TextView
+    private val scope = CoroutineScope(Dispatchers.IO)
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -57,6 +61,10 @@ class HomeFragment : Fragment() {
         binding.btn3.setOnClickListener {
             // 串行计算
             serial()
+        }
+
+        binding.btn4.setOnClickListener {
+            customScope()
         }
         return root
     }
@@ -92,6 +100,23 @@ class HomeFragment : Fragment() {
             textView.text =
                 "Done: $str1 + $str2 + 耗时 ： ${System.currentTimeMillis() - t1}"
         }
+    }
+
+    private fun customScope() {
+        runBlocking {
+            val job = launch {
+                delay(1000)
+                println("hahahah")
+            }
+
+            launch {
+                delay(500)
+                println("lalalla")
+                job.cancel()
+            }
+            println("done")
+        }
+
     }
 
     override fun onDestroyView() {
