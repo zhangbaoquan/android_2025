@@ -11,8 +11,11 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import com.example.coffer2025.databinding.FragmentHomeBinding
 import com.example.coffer2025.ui.coroutine.NetFetcher
+import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.async
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -29,7 +32,11 @@ class HomeFragment : Fragment() {
     private val binding get() = _binding!!
     private val netFetcher = NetFetcher()
     private lateinit var textView: TextView
-    private val scope = CoroutineScope(Dispatchers.IO)
+    private val handler = CoroutineExceptionHandler{_,exception ->
+        println("捕获到异常：$exception")
+    }
+
+    private val scope = CoroutineScope(SupervisorJob() + handler)
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -71,6 +78,12 @@ class HomeFragment : Fragment() {
         binding.btn5.setOnClickListener {
 //            useDispatchersV1()
             useDispatchersV2()
+        }
+        binding.btn6.setOnClickListener {
+//            customHandler()
+//            customHandlerV2()
+//            customHandlerV3()
+            customHandlerV4()
         }
         return root
     }
@@ -156,6 +169,88 @@ class HomeFragment : Fragment() {
             delay(1000)
             "jajaj"
         }
+    }
+
+    /**
+     * 自定义异常处理
+     */
+    private fun customHandler(){
+        lifecycleScope.launch {
+            // 异常一
+            // launch 中的异常立即传播
+            // 你不会 catch 到它，它会向上传播给协程作用域，若没有处理，将崩溃整个 scope
+            val job1 = CoroutineScope(Dispatchers.Default).launch {
+                throw RuntimeException("出错了")
+            }
+
+            // 异常二
+            // async 中异常延迟到 await()
+            val deferred1 = CoroutineScope(Dispatchers.Default).async {
+                throw RuntimeException("Async出错了")
+            }
+            // 此时才会抛出异常
+            deferred1.await()
+        }
+    }
+
+    /**
+     * 自定义异常处理
+     */
+    private fun customHandlerV2(){
+        lifecycleScope.launch {
+            scope.launch {
+                throw RuntimeException("Boom!")
+            }
+        }
+    }
+
+    val parent1 = CoroutineScope(Job())
+    /**
+     * 默认Job，一个子协程异常，全部子协程都被取消
+     * 下面的结果是子协程 B 崩溃 → 全部协程都被取消
+     */
+    private fun customHandlerV3(){
+        parent1.launch {
+            launch {
+                delay(1000)
+                println("任务 A 完成")
+            }
+            launch {
+                throw RuntimeException("任务 B 崩溃")
+            }
+
+            launch {
+                delay(2000)
+                println("任务 C 也无法完成")
+            }
+        }
+    }
+
+    val parent2 = CoroutineScope(SupervisorJob() + handler)
+
+    /**
+     * SupervisorJob（容错型）
+     */
+    private fun customHandlerV4(){
+        parent2.launch {
+            launch {
+                delay(1000)
+                println("任务 A 完成")
+            }
+            launch {
+                try {
+                    throw RuntimeException("任务 B 崩溃啦啦")
+                }catch (e: Exception){
+                    e.cause
+                }
+            }
+            launch {
+                delay(2000)
+                println("任务 C 完成")
+            }
+        }
+        // 加这个防止 main 线程提前退出
+        Thread.sleep(3000)
     }
 
     override fun onDestroyView() {
