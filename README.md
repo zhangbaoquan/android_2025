@@ -161,11 +161,47 @@ isCancelled = true // 协程被 cancel() 触发（失败中的一种情况）
 job.invokeOnCompletion { ... }
 
 # 协程知识梳理（第四讲）——协程进阶优化与实践
+## StateFlow 是什么？与 LiveData 的区别
+* StateFlow 是 Kotlin 协程库中的状态流（state-holder observable flow）。
+* 类似 LiveData，可以持有状态并通知观察者状态变化。
+* **永远有一个值**，可以通过 .value 获取当前状态。
+
+🔍 StateFlow 与 LiveData 对比
+1. StateFlow的特点：
+* 原生不支持生命周期感知（但可配合 lifecycleScope）
+* 完全协程化，适合现代协程架构
+* 多线程能力（viewModelScope + Dispatchers）
+* 粘性（可回放）：始终有值
+* 必须有初始值
+* 最适合 UI 状态持有、组合、变换
+
+2. LiveData的特点：
+* 自动感知生命周期
+* 不支持协程直接发射
+* UI线程使用受限
+* （粘性）
+* 可无初始值
+* UI 更新（老式架构）
+
+## SharedFlow 是什么？适合广播事件（多消费者）
+🔁 SharedFlow 概述：
+* 类似 EventBus，可以将事件发送给多个监听者
+* 默认不保留值（可配置 replay）
+* **用于一次性事件广播**（如 Toast、导航跳转）
+🧠 SharedFlow 的典型用途：
+* 页面导航指令
+* 弹窗/提示框展示
+* Snackbar/Toast 消息
+* 网络错误通知
+
 ## 理解 StateFlow 与 SharedFlow 的区别
 * StateFlow  ： 目的是状态管理（如 UI 状态），必须有初始值，不可以重复放值，只能保持最后一个值。多次订阅会收到历史值，支持粘性，主要用在loading、页面数据、按钮状态等。
 * SharedFlow ： 目的是事件通知（如 Toast、导航），没有初始值，可以配置 replay来重放值，多次订阅是否会收到历史值（可配置是否接收历史），可配置是否支持粘性，主要用在Toast、Dialog 弹出、导航事件等。
 
-
+✅ StateFlow 的优点小结：
+* 能直接读写 .value，比 Flow 更具可控性
+* 适合表示UI 状态（界面数据/状态切换等）
+* 配合 repeatOnLifecycle 可实现生命周期安全收集
 
 
 
