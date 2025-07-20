@@ -2,6 +2,7 @@ package com.example.coffer2025.ui.home
 
 import android.annotation.SuppressLint
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -11,19 +12,24 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import com.example.coffer2025.databinding.FragmentHomeBinding
 import com.example.coffer2025.ui.coroutine.NetFetcher
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.async
+import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 import kotlin.system.measureTimeMillis
 
 class HomeFragment : Fragment() {
+
+    private val tag = "HomeFragment->tag"
 
     private var _binding: FragmentHomeBinding? = null
 
@@ -90,6 +96,14 @@ class HomeFragment : Fragment() {
 //            homeViewModel.getData2()
 //            homeViewModel.getData3()
             homeViewModel.getData4()
+        }
+        binding.btn8.setOnClickListener {
+            // 开始协程
+            startTask()
+        }
+        binding.btn9.setOnClickListener {
+            // 取消协程
+            cancelTask()
         }
 
         return root
@@ -258,6 +272,27 @@ class HomeFragment : Fragment() {
         }
         // 加这个防止 main 线程提前退出
         Thread.sleep(3000)
+    }
+
+    private var job:Job? = null
+
+    private fun startTask(){
+        job = CoroutineScope(Dispatchers.Default).launch {
+            try {
+                Log.i(tag,"协程启动中 isActive=${isActive}")
+                delay(2000)
+                Log.i(tag,"协程运行完成")
+            }catch (e: CancellationException){
+                Log.e(tag,"协程被取消: $e")
+            }
+
+        }
+    }
+
+    private fun cancelTask(){
+        Log.i(tag,"取消协程")
+        job?.cancel()
+        Log.i(tag,"协程完成状态：isActive=${job?.isActive}, isCompleted=${job?.isCompleted}, isCancelled=${job?.isCancelled}")
     }
 
     override fun onDestroyView() {

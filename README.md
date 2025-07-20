@@ -117,6 +117,48 @@ suspend 关键字的作用是允许该函数“挂起自己”，并让出线程
 * 2、coroutineScope {}
   确保所有子协程都完成才继续向下执行,如果其中一个 async 抛异常，整个 coroutineScope 会取消，其他协程也会被取消。适合多个请求之间有 “全成或全败” 的业务逻辑
 
+# 三、协程知识梳理（第三讲）——协程取消与生命周期感知
+## 协程的取消原理
+* 协程内部通过协作式取消机制（Cooperative Cancellation）终止任务。
+* 若协程处于挂起点（如 delay()、withContext()），它可以被取消。
+* 否则需要手动检查取消状态。
+* lifecycleScope：Activity/Fragment 生命周期感知作用域，随宿主销毁自动取消。
+* viewModelScope：绑定 ViewModel 生命周期，适合做 UI 层任务。
+
+### 状态属性理解图
+  方法 / 属性             类型            含义                                      用法示例
+
+* job.start()            方法            手动启动协程（默认是懒加载时）                val job = launch(start = CoroutineStart.LAZY) {...}; job.start()
+* job.cancel()           方法            取消协程（会触发 CancellationException）    job.cancel()
+* job.join()             挂起方法         等待协程执行完毕（无返回值）                  job.join()
+* deferred.await()       挂起方法         等待协程完成并返回结果                       val result = deferred.await()
+* job.isActive           属性            当前是否处于活跃执行中                       if (job.isActive) {...}
+* job.isCompleted        属性            是否已经完成（包括成功/失败/取消）             if (job.isCompleted)
+* job.isCancelled        属性            是否已被取消                                if (job.isCancelled)
+* job.cancelAndJoin()    挂起方法         取消任务并等待完成                           job.cancelAndJoin()
+
+isActive = true    // 协程正在运行中
+↓
+（完成/失败/取消后）
+↓
+isCompleted = true // 协程执行完毕（正常 or 异常）
+isCancelled = true // 协程被 cancel() 触发（失败中的一种情况）
+
+### 协程释放哪些资源？何时释放？
+协程执行完（正常完成或异常终止）后，会自动释放以下资源：
+* 协程上下文中的调度器线程占用；例如Dispatchers.IO。
+* 内部临时对象、内存；例如局部变量、临时缓存等。
+* 打开文件、网络、数据库连接（若你显式使用了）；例如OkHttp 请求、Room 查询等。
+
+只要协程体内的代码执行完（或被取消、抛异常），协程本身的资源就释放了，不需要你手动清理协程结构。 但你自己打开的文件/流/连接，要注意 在 finally 中释放！
+
+### 补充
+1、关于 join() 和 await()的区别
+* 如果你用的是 launch {} 启动子任务，后续就用 join() 等待。join 只关心协程完成，不需要结果.
+* 如果你用的是 async {} 并想获取结果，必须用 await()。需要协程的返回结果.
+
+2、 监听协程完成（成功/失败）
+job.invokeOnCompletion { ... }
 
 
 

@@ -64,6 +64,7 @@
             android:text="使用Dispatchers"
             android:textAllCaps="false"
             tools:ignore="HardcodedText,MissingConstraints" />
+
         <Button
             android:id="@+id/btn6"
             android:layout_width="wrap_content"
@@ -85,6 +86,34 @@
             android:text="使用viewModelScope请求网络"
             android:textAllCaps="false"
             tools:ignore="HardcodedText,MissingConstraints" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <Button
+                android:id="@+id/btn8"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="10dp"
+                android:layout_marginTop="10dp"
+                android:background="@color/blue2"
+                android:text="开始协程"
+                android:textAllCaps="false"
+                tools:ignore="HardcodedText,MissingConstraints" />
+
+            <Button
+                android:id="@+id/btn9"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="10dp"
+                android:layout_marginTop="10dp"
+                android:background="@color/blue2"
+                android:text="取消协程"
+                android:textAllCaps="false"
+                tools:ignore="HardcodedText,MissingConstraints" />
+        </LinearLayout>
 
         <TextView
             android:id="@+id/text_home"
