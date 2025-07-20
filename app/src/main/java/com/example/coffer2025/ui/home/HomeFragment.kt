@@ -85,6 +85,10 @@ class HomeFragment : Fragment() {
 //            customHandlerV3()
             customHandlerV4()
         }
+        binding.btn7.setOnClickListener {
+            homeViewModel.getData1()
+        }
+
         return root
     }
 
