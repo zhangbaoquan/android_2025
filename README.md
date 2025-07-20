@@ -160,5 +160,14 @@ isCancelled = true // 协程被 cancel() 触发（失败中的一种情况）
 2、 监听协程完成（成功/失败）
 job.invokeOnCompletion { ... }
 
+# 协程知识梳理（第四讲）——协程进阶优化与实践
+## 理解 StateFlow 与 SharedFlow 的区别
+* StateFlow  ： 目的是状态管理（如 UI 状态），必须有初始值，不可以重复放值，只能保持最后一个值。多次订阅会收到历史值，支持粘性，主要用在loading、页面数据、按钮状态等。
+* SharedFlow ： 目的是事件通知（如 Toast、导航），没有初始值，可以配置 replay来重放值，多次订阅是否会收到历史值（可配置是否接收历史），可配置是否支持粘性，主要用在Toast、Dialog 弹出、导航事件等。
+
+
+
+
+
 
 
