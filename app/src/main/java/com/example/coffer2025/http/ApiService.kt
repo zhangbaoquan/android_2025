@@ -7,4 +7,7 @@ interface ApiService {
 
     @GET("/article/listproject/0/json")
     suspend fun getInfo(): ProjectListResponse
+
+    @GET("/banner/json")
+    suspend fun getBannerData(): ProjectListResponse
 }
